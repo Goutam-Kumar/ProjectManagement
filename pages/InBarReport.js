@@ -10,6 +10,7 @@ import {
     Modal,
     ActivityIndicator,
 } from 'react-native';
+import DatePicker from 'react-native-datepicker';
 
 export default class InBarReport extends React.Component{
     constructor(props){
@@ -26,6 +27,8 @@ export default class InBarReport extends React.Component{
                 freedrinks:0,
                 totalIncentive:0,
                 isModalVisible:false,
+                date:'',
+                todays_date:'',
             }
         }
     static navigationOptions = {  
@@ -50,12 +53,28 @@ export default class InBarReport extends React.Component{
           amntSold:'',
           voucher:'',
           freedrinks:'',
-          totalIncentive:''}
+          totalIncentive:'',
+          date:'',
+        }
 
       );
   }
+
+  componentDidMount(){
+    var date = new Date();
+          var yr = date.getFullYear();
+          var mon = date.getMonth();
+          var month = ((mon+1)<10)?"0"+(mon+1):(mon+1);
+          var dat = date.getDate();
+          var datt = ((dat+1)<10)?"0"+(dat):(dat);
+          var td = yr +"-"+month+"-"+datt;
+          this.setState({  
+            todays_date: td,     
+          });
+  }
    
    SaveItemToServer = async () =>{
+     
        this.showModal();
     var userData =  await AsyncStorage.getItem('loggedUser');
     var userDataJSON = JSON.parse(userData);
@@ -68,7 +87,7 @@ export default class InBarReport extends React.Component{
     var projectId = await AsyncStorage.getItem('project_id');
     let  details ={
       'field_staff_id': staff_id,
-      'date':datee,
+      'date':this.state.date,
       'project_id':projectId,
       'cfa_code': this.state.cfaCode,
       'contact_number': this.state.contactNumber,
@@ -128,7 +147,36 @@ export default class InBarReport extends React.Component{
                         </View>
                     </View>
             </Modal>
-
+            <DatePicker
+                      style={{width: 300,marginTop:10,alignSelf:'center'}}
+                      date={this.state.date}
+                      mode="date"
+                      placeholder="select date"
+                      format="YYYY-MM-DD"
+                      minDate="2019-01-01"
+                      maxDate={this.state.todays_date}
+                      confirmBtnText="Confirm"
+                      cancelBtnText="Cancel"
+                      customStyles={{
+                        dateIcon: {
+                          position: 'absolute',
+                          left: 0,
+                          top: 4,
+                          marginLeft: 0
+                        },
+                        dateInput: {
+                          marginLeft: 35,
+                          backgroundColor:"#fff",
+                          padding:10,
+                          position:'relative',
+                          borderRadius:5,
+                          color:"#34495E",
+                          
+                        }
+                        // ... You can check the source to find the other keys.
+                      }}
+                      onDateChange={(date) => {this.setState({date: date})}}
+                  />  
             <TextInput style={[style.inputbox]} placeholder="CFA Code" onChangeText={(text) => this.setState({cfaCode:text})} value={this.state.cfaCode}/>
             <TextInput style={[style.inputbox]} placeholder="Contact person" onChangeText={(text) => this.setState({contactPerson:text})} value={this.state.contactPerson}/>
             <TextInput style={[style.inputbox]} placeholder="Contact Number" keyboardType={'phone-pad'} onChangeText={(text) => this.setState({contactNumber:text})} value={this.state.contactNumber}/>
@@ -138,7 +186,7 @@ export default class InBarReport extends React.Component{
             <TextInput style={[style.inputbox]} placeholder="Voucher" keyboardType={'numeric'} onChangeText={(text) => this.setState({voucher:text})} value={this.state.voucher}/>
             <TextInput style={[style.inputbox]} placeholder="Free drinks" keyboardType={'numeric'} onChangeText={(text) => this.setState({freedrinks:text})} value={this.state.freedrinks}/>
             <TextInput style={[style.inputbox]} placeholder="Total Incentives" keyboardType={'numeric'} onChangeText={(text) => this.setState({totalIncentive:text})} value={this.state.totalIncentive}/>
-                         
+                       
             <TouchableOpacity style={{
                 padding:10, 
                 backgroundColor: '#202646',
@@ -161,6 +209,7 @@ const style = StyleSheet.create({
         justifyContent:'flex-start',
         padding: 20,
         alignContent:'center',
+        backgroundColor:'#eaeaea',
       },
     welcometext:{
         fontWeight:'bold',
@@ -175,5 +224,13 @@ const style = StyleSheet.create({
         fontFamily:"bold",
         fontWeight:'bold',
         textAlign:'center',
+      },
+      inputbox:{
+        backgroundColor:"#fff",
+        padding:10,
+        position:'relative',
+        borderRadius:5,
+        color:"#34495E",
+        marginTop:10
       },
     });

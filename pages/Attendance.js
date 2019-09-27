@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import CustomRow from '../pages/CustomRow'
 import PTRView from 'react-native-pull-to-refresh';
+import DatePicker from 'react-native-datepicker';
+import Login from './Login';
 
 export default class Attendance extends React.Component{
 
@@ -18,6 +20,8 @@ export default class Attendance extends React.Component{
             staffId: '',
             attendanceResponse: '',
             isProgress: false,
+            date:'',
+            attendanceListData:'',
         }
     }
     static navigationOptions = {  
@@ -40,7 +44,8 @@ export default class Attendance extends React.Component{
     return new Promise((resolve) => {
         
       setTimeout(()=>{resolve()}, 2000);
-      
+      this.setState({date:''});
+      this.componentDidMount();
     });
   }
 
@@ -67,8 +72,9 @@ export default class Attendance extends React.Component{
     .then((response) => response.json())
     .then((responseJson) => {
       this.setState({isProgress:false});
-      console.warn(responseJson);
+      //console.warn(responseJson);
       this.setState({attendanceResponse:responseJson});
+      this.setState({attendanceListData:responseJson});
     })
     .catch((error) => {
       this.setState({isProgress:false});
@@ -77,17 +83,69 @@ export default class Attendance extends React.Component{
     this.render();
    }
 
+   getAttendanceOnDate = (selectedDate) => {
+     this.setState({date:selectedDate});
+     
+     if(this.state.date == ''){
+        this.setState({attendanceListData:this.state.attendanceResponse});
+     }
+     else{
+        this.setState({attendanceListData:[]});
+        for(var i=0;i<this.state.attendanceResponse.length;i++){
+          var selectDate = this.state.date;
+          
+            if(selectDate == this.state.attendanceResponse[i].date){
+              //console.warn(this.state.attendanceResponse[i].date);
+              this.setState({ attendanceListData: this.state.attendanceListData.concat(this.state.attendanceResponse[i]) });
+            }
+        }
+     }
+   }
+
    getAllAttendance =() => {
     return (
         <PTRView onRefresh={this._refresh} >
+          <DatePicker
+                      style={{width: 300,marginTop:10,alignSelf:'center'}}
+                      date={this.state.date}
+                      mode="date"
+                      placeholder="select date"
+                      format="YYYY-MM-DD"
+                      minDate="2019-01-01"
+                      maxDate={this.state.todays_date}
+                      confirmBtnText="Confirm"
+                      cancelBtnText="Cancel"
+                      customStyles={{
+                        dateIcon: {
+                          position: 'absolute',
+                          left: 0,
+                          top: 4,
+                          marginLeft: 0
+                        },
+                        dateInput: {
+                          marginLeft: 35,
+                          backgroundColor:"#fff",
+                          padding:10,
+                          position:'relative',
+                          borderRadius:5,
+                          color:"#34495E",
+                          
+                        }
+                        // ... You can check the source to find the other keys.
+                      }}
+                      onDateChange={(selectedDate) => {this.getAttendanceOnDate(selectedDate)}}
+                  />
         <View style={style.container}>
             <FlatList
-            data={this.state.attendanceResponse}
+            //data={this.state.attendanceResponse}
+            data={this.state.attendanceListData}
             renderItem={({ item }) => <CustomRow
                 date={item.date}
                 time={item.time}
                 location={item.location}
                 type={item.type}
+                status={item.status}
+                check_loc={item.check_loc}
             />}
         />
         </View>

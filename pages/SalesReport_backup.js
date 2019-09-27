@@ -15,8 +15,7 @@ import {
   Image,
 } from 'react-native';
 import SalesItem from '../model/SalesItem';
-import CustomAddItem from './CustomAddItem';
-import DatePicker from 'react-native-datepicker';
+import CustomAddItem from './CustomAddItem'
 
 export default class SalesReport extends React.Component{
     constructor(props){
@@ -36,15 +35,6 @@ export default class SalesReport extends React.Component{
             phone:'',
             channel:'',
             isModalVisible:false,
-            item_id_arr : [],
-            ctn_arr:[],
-            unit_arr:[],
-            first_item_id:0,
-            first_ctn_number:0,
-            first_unit_number:0,
-            selectedPicker:'',
-            date:'',
-            todays_date:'',
           }
     }
     showModal = () => this.setState({ isModalVisible: true });
@@ -61,24 +51,9 @@ export default class SalesReport extends React.Component{
             landmark:'',
             phone:'',
             channel:'',
-            first_ctn_number:'',
-            first_item_id:'',
-            first_unit_number:'',
-            date:'',
-
       });
     }
     componentDidMount(){
-      var date = new Date();
-          var yr = date.getFullYear();
-          var mon = date.getMonth();
-          var month = ((mon+1)<10)?"0"+(mon+1):(mon+1);
-          var dat = date.getDate();
-          var datt = ((dat+1)<10)?"0"+(dat):(dat);
-          var td = yr +"-"+month+"-"+datt;
-          this.setState({  
-            todays_date: td,     
-          });
       //uncomment below line in server
       this.GetAllItemDetails();
     }
@@ -105,6 +80,9 @@ export default class SalesReport extends React.Component{
 
     saveSalesReport = () =>{
         mSalesItem = new SalesItem();
+        mSalesItem.it_id = this.state.PickerValueHolder;
+        mSalesItem.unitNumber = this.state.unitNumber;
+        mSalesItem.ctnNumber = this.state.ctnNumber;
 
         var newStateArray = this.state.salesArray.slice();
         newStateArray.push(mSalesItem);
@@ -136,54 +114,30 @@ export default class SalesReport extends React.Component{
           this.Show_Custom_Alert(!this.state.Alert_Visibility)
         }
 
-        deleteRow=(index)=>{
-          this.setState({
-            salesArray: this.state.salesArray.filter((_, i) => i !== index)
-          });
-        }
-
-        updateItemId = (itemValue,itemIndex,index) => {
-          var arr = this.state.salesArray;
-          var tempSalesData = arr[index];
-          tempSalesData.it_id = itemValue;
-          this.setState({salesArray:arr});
-        }
-
-        updateCtn = (itemValue,index) => {
-          var arr = this.state.salesArray;
-          var tempSalesData = arr[index];
-          tempSalesData.ctnNumber = itemValue;
-          this.setState({salesArray:arr,PickerValueHolder:itemValue});
+        deleteRow(index){
           console.warn(this.state.salesArray);
-        }
-
-        updateUnit = (itemValue,index) => {
-          var arr = this.state.salesArray;
-          var tempSalesData = arr[index];
-          tempSalesData.unitNumber = itemValue;
-          this.setState({salesArray:arr});
-          console.warn(this.state.salesArray);
+          this.setState(prevState => ({
+            salesArray: prevState.salesArray.splice(index, 1),
+          }));
         }
 
         addedItemList =() => {
             return this.state.salesArray.map((data,index) => {
               return (
                 <View style={style.cardContainer}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={()=>this.deleteRow(index)}>
-                      <Text style={style.cross}>X</Text>
+                  <View style={style.dataaView}>
+                    <CustomAddItem
+                        itemId={data.it_id}
+                        ctn={data.ctnNumber}
+                        unit={data.unitNumber}
+                    />
+                  </View>
+                  <TouchableOpacity onPress={() => {this.deleteRow(index)}} activeOpacity={0.7} style={style.delete}>
+                    <View  >
+                      <Image source={require('../assets/images/bin.png')}/>
+                    </View>
                   </TouchableOpacity>
                   
-                  <Picker style={style.spinner}
-                          selectedValue={this.state.salesArray[index].it_id}
-                          onValueChange={(itemValue, itemIndex) => this.updateItemId(itemValue,itemIndex,index)} >
-                            <Picker.Item label={'-----Select Item-----'} value={0} key={0} />
-                          { this.state.dataSource.map((item, key)=>(
-                              <Picker.Item label={item.item_name} value={item.item_id} key={key} />)
-                          )}
-                  </Picker>
-                <TextInput style={[style.inputbox]} placeholder="Enter ctn qty." keyboardType={'numeric'} onChangeText={(text) => this.updateCtn(text,index)} clearButtonMode="always"/>
-                <TextInput style={[style.inputbox]} placeholder="Enter unit qty" keyboardType={'numeric'} onChangeText={(text) => this.updateUnit(text,index)} clearButtonMode="always"/>
-               
                 </View>
               );
             })
@@ -195,21 +149,16 @@ export default class SalesReport extends React.Component{
         SaveItemToServer = async () => {
           if(this.state.nameRetailer != '' && this.state.address != '' 
           && this.state.landmark != '' && this.state.phone != '' 
-          && this.state.channel != '' && this.state.date != ''){
+          && this.state.channel != '' && this.state.salesArray.length != 0){
 
             this.showModal();
             let item_id_ar = []; let ctn_ar = []; let unit_ar = [];
-            
             for(let i=0;i<this.state.salesArray.length;i++){
               item_id_ar[i] = this.state.salesArray[i].it_id;
               ctn_ar[i] = this.state.salesArray[i].ctnNumber;
               unit_ar[i] = this.state.salesArray[i].unitNumber;
             }
-            let point = this.state.salesArray.length;
-            item_id_ar[point] = this.state.first_item_id;
-            ctn_ar[point] = this.state.first_ctn_number;
-            unit_ar[point] = this.state.first_unit_number;
-
+  
             var userData =  await AsyncStorage.getItem('loggedUser');
             var userDataJSON = JSON.parse(userData);
             var staff_id = userDataJSON.field_staff_id;
@@ -222,7 +171,7 @@ export default class SalesReport extends React.Component{
   
             let  details ={
               'field_staff_id': staff_id,
-              'date':this.state.date,
+              'date':datee,
               'project_id':projectId,
               'name_retailer': this.state.nameRetailer,
               'address': this.state.address,
@@ -270,13 +219,6 @@ export default class SalesReport extends React.Component{
           
         }
 
-        addMoreItemForm = () => {
-          mSalesItem = new SalesItem();
-          var newStateArray = this.state.salesArray.slice();
-          newStateArray.push(mSalesItem);
-          this.setState({salesArray: newStateArray});
-        }
-
 
     render(){
         if (this.state.isLoading) {
@@ -286,7 +228,6 @@ export default class SalesReport extends React.Component{
               </View>
             );
         }
-
         return (
           <ScrollView>
             <View style={style.container}>
@@ -305,64 +246,61 @@ export default class SalesReport extends React.Component{
 
 
               {/* alert dialog to add item */}
-                
+                <Modal
+                  visible={this.state.Alert_Visibility}
+                  transparent={true}
+                  animationType={"fade"}
+                  onRequestClose={ () => { this.Show_Custom_Alert(!this.state.Alert_Visibility)} } >
+                    <View style={{ flex:1, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={style.Alert_Main_View}>
+
+                            <Text style={style.Alert_Title}>Add Sales Items information.</Text>
+
+                            <View style={style.item_container}>
+                                <Picker style={style.spinner}
+                                    selectedValue={this.state.PickerValueHolder}
+                                    onValueChange={(itemValue, itemIndex) => this.setState({PickerValueHolder: itemValue})} >
+                                    { this.state.dataSource.map((item, key)=>(
+                                        <Picker.Item label={item.item_name} value={item.item_id} key={key} />)
+                                    )}
+                                </Picker> 
+                                <TextInput style={[style.inputbox]} placeholder="Enter ctn qty." keyboardType={'numeric'} onChangeText={(text) => this.setState({ctnNumber:text})} clearButtonMode="always"/>
+                                <TextInput style={[style.inputbox]} placeholder="Enter unit qty" keyboardType={'numeric'} onChangeText={(text) => this.setState({unitNumber:text})} clearButtonMode="always"/>
+                                <View style={{flexDirection: 'row', height: 40, marginTop:20}}>
+        
+                                <TouchableOpacity 
+                                    style={style.buttonStyle}
+                                    onPress={this.ok_Button} 
+                                    activeOpacity={0.7} >
+            
+                                    <Text style={style.TextStyle}> OK </Text>
+                        
+                                </TouchableOpacity>
+        
+        
+                                <TouchableOpacity 
+                                    style={style.buttonStyle} 
+                                    onPress={() => { this.Show_Custom_Alert(!this.state.Alert_Visibility)} } 
+                                    activeOpacity={0.7} >
+                                    <Text style={style.TextStyle}> CANCEL </Text>
+                                </TouchableOpacity>
+                            </View>
+                            </View>
+                            
+                        </View>
+                    </View>
+                </Modal>
          
-              <DatePicker
-                      style={{width: 300,marginTop:10,alignSelf:'center'}}
-                      date={this.state.date}
-                      mode="date"
-                      placeholder="select date"
-                      format="YYYY-MM-DD"
-                      minDate="2019-01-01"
-                      maxDate={this.state.todays_date}
-                      confirmBtnText="Confirm"
-                      cancelBtnText="Cancel"
-                      customStyles={{
-                        dateIcon: {
-                          position: 'absolute',
-                          left: 0,
-                          top: 4,
-                          marginLeft: 0
-                        },
-                        dateInput: {
-                          marginLeft: 35,
-                          backgroundColor:"#fff",
-                          padding:10,
-                          position:'relative',
-                          borderRadius:5,
-                          color:"#34495E",
-                          
-                        }
-                        // ... You can check the source to find the other keys.
-                      }}
-                      onDateChange={(date) => {this.setState({date: date})}}
-                  />
+         
                 <TextInput style={[style.inputbox]} placeholder="Name of Retailer" onChangeText={(text) => this.setState({nameRetailer:text})} value={this.state.nameRetailer}/>
                 <TextInput style={[style.inputbox]} placeholder="Address" onChangeText={(text) => this.setState({address:text})} value={this.state.address}/>
                 <TextInput style={[style.inputbox]} placeholder="Landmark" onChangeText={(text) => this.setState({landmark:text})} value={this.state.landmark}/>
                 <TextInput style={[style.inputbox]} placeholder="Phone Number" keyboardType={'phone-pad'} onChangeText={(text) => this.setState({phone:text})} value={this.state.phone}/>
                 <TextInput style={[style.inputbox]} placeholder="Channel"  onChangeText={(text) => this.setState({channel:text})} value={this.state.channel}/>
-                
-                <View style={style.cardContainer}>
-                <Picker style={style.spinner}
-                          selectedValue={this.state.first_item_id}
-                          onValueChange={(itemValue, itemIndex) => this.setState({first_item_id:itemValue})} >
-                            <Picker.Item label={'-----Select Item-----'} value={0} key={0} />
-                          { this.state.dataSource.map((item, key)=>(
-                              <Picker.Item label={item.item_name} value={item.item_id} key={key} />)
-                          )}
-                  </Picker>
-                  <TextInput style={[style.inputbox]} placeholder="Enter ctn qty." keyboardType={'numeric'} onChangeText={(text) => this.setState({first_ctn_number:text})} clearButtonMode="always" value={this.state.first_ctn_number}/>
-                  <TextInput style={[style.inputbox]} placeholder="Enter unit qty" keyboardType={'numeric'} onChangeText={(text) => this.setState({first_unit_number:text})} clearButtonMode="always" value={this.state.first_unit_number}/>
-                </View>
-                
-                
-                
-                
                 <View>
                   {this.addedItemList()}
                 </View>
-                <TouchableOpacity  activeOpacity={0.7} onPress={() => this.addMoreItemForm()}>
+                <TouchableOpacity onPress={() => { this.Show_Custom_Alert(true) } } activeOpacity={0.7} >
                       <Text style={style.addButton}> Add Sales Item </Text>
                 </TouchableOpacity>
                 
@@ -389,7 +327,6 @@ const style = StyleSheet.create({
         justifyContent:'flex-start',
         padding: 20,
         alignContent:'center',
-        backgroundColor:'#eaeaea'
       },
       welcometext:{
         fontWeight:'bold',
@@ -402,10 +339,8 @@ const style = StyleSheet.create({
         justifyContent: 'center',  
         position:'relative',
         borderBottomWidth:1, 
-        borderRadius:10,
         borderColor: 'rgb(204, 204, 204)',
         backgroundColor:"#FFF",
-        marginTop:5,
       },
       inputbox:{
         backgroundColor:"#fff",
@@ -489,12 +424,14 @@ const style = StyleSheet.create({
         },
         cardContainer: {
           flex: 1,
-          flexDirection: 'column',
+          flexDirection: 'row',
           padding: 10,
-          marginTop: 10,
-          marginBottom: 10,
+          marginLeft:16,
+          marginRight:16,
+          marginTop: 8,
+          marginBottom: 8,
           borderRadius: 5,
-          backgroundColor: '#FAFAFA',
+          backgroundColor: '#FFF',
           elevation: 2,
         },
         delete:{
@@ -509,11 +446,4 @@ const style = StyleSheet.create({
         marginLeft: 12,
         justifyContent: 'center',
       },
-      cross:{
-        fontWeight:'bold',
-        fontSize:20,
-        color:'#999',
-        padding:10,
-        alignSelf:'flex-end'
-      }
     });

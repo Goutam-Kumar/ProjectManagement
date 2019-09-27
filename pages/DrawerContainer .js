@@ -18,9 +18,9 @@ export default class DrawerContainer extends React.Component {
           Home
         </Text>
         <Text
-          onPress={() => navigation.navigate('Attandance')}
+          onPress={() => navigation.navigate('Attendance')}
           style={styles.uglyDrawerItem}>
-          Attandance
+          Attendance
         </Text>
         <Text
           onPress={() => navigation.navigate('Report')}

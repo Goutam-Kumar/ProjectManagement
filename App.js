@@ -251,7 +251,7 @@ const AppDrawerNavigator = createDrawerNavigator({
   Home: {  
       screen: HomeStackNavigator  
   },  
-  Attandance: {  
+  Attendance: {  
       screen: AttandanceStackNavigator  
   },
   Report: {  

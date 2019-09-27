@@ -82,8 +82,8 @@ export default class DisplayInStoreReport extends React.Component{
         mInStoreReportItem.InStoreReportExpandItem = responseJson[i].pro;
         salesArr[i] = mInStoreReportItem;
       }
-      this.setState({salesResponse:salesArr});
-      console.warn(this.state.salesResponse);
+      this.setState({salesResponse:salesArr.reverse()});
+      //console.warn(this.state.salesResponse);
     })
     .catch((error) => {
       console.error(error);
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
         color:'#fff'
       },
       containerbox: {
-        width:"100%",
+        flex:1,
         flexDirection: 'row',
         padding: 10,
         marginLeft:16,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     title: {
-        flex:1,
+        width:"100%",
         fontSize: 20,
         color: '#000',
     },

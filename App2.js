@@ -2,188 +2,83 @@ import React, {Component} from 'react';
 import {
   StyleSheet,
   View,
+  Image,
+  TouchableOpacity,
+  Platform,
   Text,
-  FlatList,
-  AsyncStorage,
-  TouchableHighlight,
 } from 'react-native';
-import SalesReportItems from './views/SalesReportItems';
-import SalesReportItem from './model/SalesReportItem';
+import { TextInput } from 'react-native-gesture-handler';
+
+
 
 export default class App extends React.Component{
-
     constructor(props){
         super(props);
-        this.handleClick = this.handleClick.bind(this);
-        this.renderSales = this.renderSales.bind(this);
         this.state = {
-            staffId: '1',
-            salesResponse: [],
-            isProgress: false,
-            collapse:false,
-            SalesReportId:0,
-        }
+            numInput:[],
+        };
     }
-    static navigationOptions = {  
-        title: 'Attendance',  
-        headerTintColor: "#FFF",
-            headerStyle: {
-                backgroundColor: '#354F87',
-                height: 56,
-                elevation: 2
-            }
-   };  
-   componentDidMount(){
-        this.GetSalesReport();
-   }
-   _refresh = () => {
-    return new Promise((resolve) => {
-        
-      setTimeout(()=>{resolve()}, 2000);
-      
-    });
-  }
+    AddMoreDiv = () => {
+        var newStateArray = this.state.numInput.slice();
+        newStateArray.push("");
+        this.setState({numInput: newStateArray});
+        console.warn(this.state.numInput);
+    }
 
-  GetSalesReport = () => {
+    updateState = (text,index) => {
+        var arr = this.state.numInput;
+        arr[index] = text;
+        this.setState({numInput:arr});
+        console.warn(this.state.numInput);
+    }
 
-    let  details ={
-        'staff_id': this.state.staffId,
-      };
-      let formBody = [];
-      for (let property in details) {
-        let encodedKey = encodeURIComponent(property);
-        let encodedValue = encodeURIComponent(details[property]);
-        formBody.push(encodedKey + "=" + encodedValue);
-      }
-      formBody = formBody.join("&");
-      fetch('http://tradingmmo.com/pma/api/get_sales_report', {  
-      method: 'POST',
-      headers: {
-        'Accept': '*/*',
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: formBody
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      
-      let salesArr = [];
-      //console.warn(responseJson.length);
-      for(let i=0;i<responseJson.length;i++){
-        let mSalesReportItem = new SalesReportItem(); 
-        mSalesReportItem.sales_report_id = responseJson[i].sale.sales_report_id;
-        mSalesReportItem.date = responseJson[i].sale.date;
-        mSalesReportItem.name_retailer = responseJson[i].sale.name_retailer;
-        mSalesReportItem.project_id = responseJson[i].sale.project_id;
-        mSalesReportItem.SalesReportExpandItem = responseJson[i].pro;
-        salesArr[i] = mSalesReportItem;
-      }
-      this.setState({salesResponse:salesArr});
-      console.warn(this.state.salesResponse);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-    this.render();
-   }
-
-  handleClick = ({item,index}) => {
-     let sales = this.state.salesResponse;
-     let targetSalesResponse = sales[index];
-     targetSalesResponse.isExpanded = !targetSalesResponse.isExpanded;
-     this.setState({salesResponse:sales});
-     //console.warn(targetSalesResponse);
-  }
-
-   renderSales({ item, index }){
-        return <View style={styles.containerbox}>
-            <TouchableHighlight underlayColor="#f1f1f1" onPress = {() => this.handleClick({item,index})}>
-
-            <View style={styles.container_text} >
-                <Text style={styles.title}>
-                    Retailer Name: {item.name_retailer}
-                </Text>
-                <Text style={styles.description}>
-                    Date: {item.date }
-                </Text>
-                <Text style={styles.description}>
-                    Project ID: {item.isExpanded}
-                </Text>
-                { item.isExpanded ? 
-                  //this.state.SalesReportId === item.sales_report_id ?
-
-                    <View>
-                        {
-                            item.SalesReportExpandItem.map((data) => {
-                                return (
-                                  <SalesReportItems
-                                    itemId={data.item_name}
-                                    ctn={data.ctn}
-                                    unit={data.unit}
-                                  />
-                                );
-                              })
-                        }
-                    </View>
-                    :
-                    null
-                }
-            </View>
-            </TouchableHighlight>
-          </View>
-   }
-
-   
+    addAllViews = () => {
+        return(
+            <View>
+                    {
+                        this.state.numInput.map((input,index)=>{
+                            return(
+                                <View>
+                                <TextInput style={style.inputText} value={this.state.numInput[index]} onChangeText={(text) => this.updateState(text,index)}/>
+                            </View>
+                            );
+                             
+                        })
+                    }
+                </View>
+        );
+    }
 
     render(){
-      return (
-        <View style={styles.container}>
-            <FlatList
-            data={this.state.salesResponse}
-            extraData = {this.state}
-            renderItem={this.renderSales}/>
-        </View>
-      );
-      
+        return(
+            <View style={style.container}>
+                {this.addAllViews()}
+                <TouchableOpacity style={style.textStyle} onPress={() => this.AddMoreDiv()}>
+                    <Text>Add More</Text>
+                </TouchableOpacity>
+                
+            </View>
+          );
     }
 }
 
-
-const styles = StyleSheet.create({
+const style = StyleSheet.create({
     container:{
-        flex: 1,
-        
-      },
-      welcometext:{
+      flex:1,
+      justifyContent:'flex-start',
+      alignItems:'center',
+      backgroundColor:"#3B5998",
+    },
+    textStyle:{
+        color:'#fff',
+        fontSize:20,
         fontWeight:'bold',
-        fontSize:30,
-        color:'#fff'
-      },
-      containerbox: {
-        flex: 1,
-        flexDirection: 'row',
-        padding: 10,
-        marginLeft:16,
-        marginRight:16,
-        marginTop: 8,
-        marginBottom: 8,
-        borderRadius: 5,
-        backgroundColor: '#FFF',
-        elevation: 2,
     },
-    title: {
-        fontSize: 20,
-        color: '#000',
+    inputText:{
+        backgroundColor:'#fff',
+        borderColor:'#f00',
+        borderRadius:10,
+        width:400,
+        height:50,
     },
-    container_text: {
-        flex: 1,
-        flexDirection: 'column',
-        marginLeft: 12,
-        justifyContent: 'center',
-    },
-    description: {
-        fontSize: 16,
-        fontStyle: 'italic',
-        color:"#777778"
-    },
-    });
+  });

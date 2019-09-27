@@ -20,8 +20,8 @@ export default class Home extends React.Component{
             time: new Date().toLocaleString(),
             colors:['#202646', '#DE8B0B', '#EC123D'],
             buttonColor:'#202646',
-            btnText:['Clock-in/Clocked-in','Mid Day Clock/Mid Day Clocked','Clock Out/Clocked out'],
-            buttonText:'Clock-in/Clocked-in',
+            btnText:['Clock-in','Mid Day Clock','Clock Out'],
+            buttonText:'Clock-in',
             currentFlag:0,
             deviceID:'',
             loggedUser_name:'',
@@ -34,6 +34,8 @@ export default class Home extends React.Component{
             type:0,
             attandance_today_count:0,
             isButtonVisible:false,
+            attendanceLabel:'',
+            attendanceArray:[],
         };
       }
 
@@ -124,21 +126,24 @@ export default class Home extends React.Component{
         };
     };
     changeColor = () => {
-        //var param = this.state.type;
+        var param = this.state.type;
         const colorArray= this.state.colors;
         const btnTextArray = this.state.btnText;
         
-        // switch(param) {
-        //     case "0":
-        //             this.state.type = "1";
-        //         break;
-        //     case "1":
-        //             this.state.type = "2";
-        //         break;
-        //     case "2":
-        //             this.state.type = "3";
-        //         break;
-        // }
+        switch(parseInt(param)) {
+            case 0:
+                    this.state.attendanceLabel = '';
+                break;
+            case 1:
+                    this.state.attendanceLabel = "CHECKED IN";
+                break;
+            case 2:
+                    this.state.attendanceLabel = "CHECKED IN"+"\n"+"MID DAY CLOCKED";
+                break;
+            case 3:
+                    this.state.attendanceLabel = "CHECKED IN"+"\n"+"MID DAY CLOCKED"+"\n"+"CLOCKED OUT";
+                break;
+        }
         
         var currentColor = colorArray[this.state.type];
         var currentText = btnTextArray[this.state.type];
@@ -196,11 +201,25 @@ export default class Home extends React.Component{
         var projId = responseJson.timing_today[0].project_id;
         AsyncStorage.setItem('project_id',projId);
         this.setState({attandance_today_count:responseJson.attandance_today_count});
-
+        switch(responseJson.attandance_today_count) {
+          case 0:
+                  this.state.attendanceLabel = '';
+              break;
+          case 1:
+                  this.state.attendanceLabel = "CHECKED IN";
+              break;
+          case 2:
+                  this.state.attendanceLabel = "CHECKED IN"+"\n"+"MID DAY CLOCKED";
+              break;
+          case 3:
+                  this.state.attendanceLabel = "CHECKED IN"+"\n"+"MID DAY CLOCKED"+"\n"+"CLOCKED OUT";
+              break;
+            }
         if(this.state.attandance_today_count < 3){
           this.setState({isButtonVisible:true});
           var mtype = parseInt(this.state.attandance_today_count) + 1;
           this.setState({type:mtype});
+          
           var currentColor = this.state.colors[parseInt(this.state.attandance_today_count)];
           var currentText = this.state.btnText[parseInt(this.state.attandance_today_count)];
           this.setState({buttonColor:currentColor,buttonText:currentText}); 
@@ -272,6 +291,10 @@ export default class Home extends React.Component{
             <Text style={style.largeText}>Welcome {this.state.loggedUser_name}</Text>
             <View style={style.twoPartScreen}>
                     <Text style={style.textStyle}> {this.state.time}</Text>
+            </View>
+
+            <View>
+              <Text style={style.attendanceLabel}>{this.state.attendanceLabel}</Text>
             </View>
 
             <View>
@@ -367,6 +390,16 @@ const style = StyleSheet.create({
         borderWidth:2,
         padding:10,
         alignSelf:'center',
+      },
+
+      attendanceLabel:{
+        color:"#d9d31c",
+        width:300,
+        fontSize:12,
+        fontFamily:"bold",
+        fontWeight:'bold',
+        textAlign:'center',
+        marginTop:15,
       }
 
 });

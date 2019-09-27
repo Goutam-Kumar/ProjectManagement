@@ -81,8 +81,8 @@ export default class DisplaySalesReport extends React.Component{
         mSalesReportItem.SalesReportExpandItem = responseJson[i].pro;
         salesArr[i] = mSalesReportItem;
       }
-      this.setState({salesResponse:salesArr});
-      console.warn(this.state.salesResponse);
+      this.setState({salesResponse:salesArr.reverse()});
+      //console.warn(this.state.salesResponse);
     })
     .catch((error) => {
       console.error(error);

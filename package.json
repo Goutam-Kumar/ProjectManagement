@@ -11,6 +11,7 @@
     "native-base": "^2.13.5",
     "react": "16.8.6",
     "react-native": "0.60.5",
+    "react-native-datepicker": "^1.7.2",
     "react-native-device-info": "^2.3.2",
     "react-native-easy-toast": "^1.2.0",
     "react-native-geolocation-service": "^3.1.0",

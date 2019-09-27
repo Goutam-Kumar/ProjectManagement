@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const CustomRow = ({ date, time, location,type }) => (
+const CustomRow = ({ date, time, location,type, status, check_loc }) => (
     <View style={styles.container}>
         <View style={styles.container_text}>
             <Text style={styles.title}>
@@ -44,11 +44,17 @@ const CustomRow = ({ date, time, location,type }) => (
             <Text style={styles.description}>
                 Time: {time}
             </Text>
-            <Text style={styles.description}>
+            {/* <Text style={styles.description}>
                 Location: {location}
-            </Text>
+            </Text> */}
             <Text style={styles.description}>
                 Type: {this.getTypeDef(type)}
+            </Text>
+            <Text style={styles.description}>
+                Status: {this.getStatus(status)}
+            </Text>
+            <Text style={styles.description}>
+                Checked Location: {this.getCheckLocation(check_loc)}
             </Text>
         </View>
 
@@ -65,6 +71,39 @@ getTypeDef = (type) =>{
         return "CLOCKED OUT";
     }else{
         return "";
+    }
+}
+
+getStatus = (status) => {
+    var st = '';
+    switch(status){
+        case '1':
+            st = 'Present';
+            break;
+        case '2':
+            st = 'Wrong Location';
+            break;
+        case '3':
+            st = 'Late';
+            break;
+        case '4':
+            st = 'Early Closing';
+            break;
+        case '5':
+            st = 'Wrong location & Late'
+            break;
+        default:
+            st ='';
+            break;
+    }
+    return st;
+}
+
+getCheckLocation = (check_loc) => {
+    if(getCheckLocation === ''){
+        return '';
+    }else{
+        return check_loc;
     }
 }
 

@@ -19,10 +19,16 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     container_text: {
-        flex: 1,
+        flex: 0.8,
         flexDirection: 'column',
         marginLeft: 12,
         justifyContent: 'center',
+    },
+
+    delete:{
+        flex:0.2,
+        flexDirection: 'column',
+        justifyContent:'center',
     },
     description: {
         fontSize: 16,
@@ -35,8 +41,12 @@ const styles = StyleSheet.create({
     },
 });
 
+deleteItem =() => {
+    alert('Delete');
+}
+
 const CustomAddItem = ({ itemId, ctn, unit }) => (
-    <View style={styles.container}>
+    <View >
         <View style={styles.container_text}>
             <Text style={styles.title}>
             ITEM ID: {itemId}
@@ -47,8 +57,11 @@ const CustomAddItem = ({ itemId, ctn, unit }) => (
             <Text style={styles.description}>
             UNIT NUMBER: {unit}
             </Text>
-            
         </View>
+
+        {/* <View style={styles.delete} onPress={() => this.deleteItem()}>
+                <Image source={require('../assets/images/bin.png')}/>
+        </View> */}
 
     </View>
 );
